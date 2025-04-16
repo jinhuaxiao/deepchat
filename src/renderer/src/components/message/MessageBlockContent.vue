@@ -6,7 +6,8 @@
       <div
         v-if="part.type === 'text'"
         :id="id"
-        class="prose prose-sm dark:prose-invert max-w-full break-all"
+        class="prose prose-sm dark:prose-invert max-w-full break-all message-content"
+        :style="customFontStyle"
         @click="handleCopyClick"
         @mouseover="handleHover($event, true)"
         @mouseout="handleHover($event, false)"
@@ -34,7 +35,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, nextTick, watch, onMounted, onUnmounted } from 'vue'
+import { ref, nextTick, watch, onMounted, onUnmounted, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { getMarkdown, renderMarkdown } from '@/lib/markdown.helper'
 import { v4 as uuidv4 } from 'uuid'
@@ -65,6 +66,20 @@ const props = defineProps<{
   threadId: string
   isSearchResult?: boolean
 }>()
+
+// 计算响应消息的自定义字体样式
+const customFontStyle = computed(() => {
+  // 从 CSS 变量获取当前字体设置
+  const fontFamily = getComputedStyle(document.documentElement).getPropertyValue('--font-family').trim()
+  
+  // 如果有设置字体，应用到响应消息
+  if (fontFamily) {
+    return { fontFamily }
+  }
+  
+  // 否则返回空对象，使用默认样式
+  return {}
+})
 
 const id = ref(`editor-${uuidv4()}`)
 
@@ -262,8 +277,7 @@ onUnmounted(() => {
 <style>
 .prose {
   @apply leading-7;
-  font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family: var(--font-family, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

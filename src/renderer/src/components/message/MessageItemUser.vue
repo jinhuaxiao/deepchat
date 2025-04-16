@@ -29,10 +29,11 @@
         <div v-if="isEditMode" class="text-sm w-full">
           <textarea
             v-model="editedText"
-            class="w-full min-h-[80px] p-1 border rounded bg-background dark:bg-muted-foreground/10 whitespace-pre-wrap break-all resize-y"
+            class="w-full min-h-[80px] p-1 border rounded bg-background dark:bg-muted-foreground/10 whitespace-pre-wrap break-all resize-y message-content"
+            :style="customFontStyle"
           ></textarea>
         </div>
-        <div v-else class="text-sm whitespace-pre-wrap break-all">{{ displayText }}</div>
+        <div v-else class="text-sm whitespace-pre-wrap break-all message-content" :style="customFontStyle">{{ displayText }}</div>
         <!-- <div
           v-else-if="message.content.continue"
           class="text-sm whitespace-pre-wrap break-all flex flex-row flex-wrap items-center gap-2"
@@ -71,7 +72,7 @@ import FileItem from '../FileItem.vue'
 import MessageToolbar from './MessageToolbar.vue'
 import { useChatStore } from '@/stores/chat'
 import { usePresenter } from '@/composables/usePresenter'
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 
 const chatStore = useChatStore()
 const windowPresenter = usePresenter('windowPresenter')
@@ -85,6 +86,20 @@ const isEditMode = ref(false)
 const editedText = ref('')
 const originalText = ref('')
 const displayText = ref('')
+
+// 计算用户消息的自定义字体样式
+const customFontStyle = computed(() => {
+  // 从 CSS 变量获取当前字体设置
+  const fontFamily = getComputedStyle(document.documentElement).getPropertyValue('--font-family').trim()
+  
+  // 如果有设置字体，应用到用户消息
+  if (fontFamily) {
+    return { fontFamily }
+  }
+  
+  // 否则返回空对象，使用默认样式
+  return {}
+})
 
 // Initialize display text with message content
 displayText.value = props.message.content.text

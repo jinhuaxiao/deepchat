@@ -8,6 +8,10 @@
       http-equiv="Content-Security-Policy"
       content="script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline'"
     /> -->
+    <!-- 添加Google Fonts手写字体 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat&family=Dancing+Script&family=Indie+Flower&family=JetBrains+Mono:wght@400;700&family=Kalam&family=Pacifico&family=Satisfy&family=Shadows+Into+Light&display=swap" rel="stylesheet">
     <style>
       :root {
         --background: 0 0% 100%;
@@ -30,6 +34,8 @@
         --input: 214.3 31.8% 91.4%;
         --ring: 221.2 83.2% 53.3%;
         --radius: 0.75rem;
+        --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        --font-size: 14px;
       }
 
       .dark {
@@ -52,6 +58,8 @@
         --border: 217.2 32.6% 17.5%;
         --input: 217.2 32.6% 17.5%;
         --ring: 224.3 76.3% 48%;
+        --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        --font-size: 14px;
       }
       
       html, body {
@@ -60,7 +68,8 @@
         overscroll-behavior: none;
         height: 100%;
         width: 100%;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        font-family: var(--font-family, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif);
+        font-size: var(--font-size, 14px);
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
       }

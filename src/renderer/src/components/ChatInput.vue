@@ -9,7 +9,7 @@
   >
     <TooltipProvider>
       <div
-        class="bg-background-super-200 border border-border/40 rounded-3xl focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary/70 p-4 flex flex-col gap-3 shadow-md hover:shadow-lg transition-all duration-200 relative"
+        class="chat-input bg-background-super-200 border border-border/40 rounded-3xl focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary/70 p-4 flex flex-col gap-3 shadow-md hover:shadow-lg transition-all duration-200 relative"
       >
         <!-- 文件区域 -->
         <div v-if="selectedFiles.length > 0" class="pb-1">

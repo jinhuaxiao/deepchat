@@ -20,6 +20,38 @@
           </Select>
         </div>
       </div>
+      <!-- 字体设置 -->
+      <div class="flex flex-row p-2 items-center gap-2 px-2">
+        <span class="flex flex-row items-center gap-2 flex-grow w-full">
+          <Icon icon="lucide:type" class="w-4 h-4 text-muted-foreground" />
+          <span class="text-sm font-medium">{{ t('settings.common.fontFamily') || '字体样式' }}</span>
+        </span>
+        <div class="flex-shrink-0 min-w-64 max-w-96">
+          <Select v-model="selectedFont" class="">
+            <SelectTrigger>
+              <SelectValue :placeholder="t('settings.common.selectFont') || '选择字体'" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem v-for="font in fontOptions" :key="font.value" :value="font.value">
+                {{ font.label }}
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+      <!-- 字体大小设置 -->
+      <div class="flex flex-row p-2 items-center gap-2 px-2">
+        <span class="flex flex-row items-center gap-2 flex-grow w-full">
+          <Icon icon="lucide:text" class="w-4 h-4 text-muted-foreground" />
+          <span class="text-sm font-medium">{{ t('settings.common.fontSize') || '字体大小' }}</span>
+        </span>
+        <div class="flex-shrink-0 min-w-64 max-w-96">
+          <div class="flex items-center gap-2">
+            <Slider v-model="fontSizeValue" :min="12" :max="20" :step="1" class="flex-grow" />
+            <span class="text-xs text-muted-foreground w-8 text-right">{{ fontSizeValue[0] }}px</span>
+          </div>
+        </div>
+      </div>
       <!-- 搜索引擎选择 -->
       <div class="flex flex-row p-2 items-center gap-2 px-2">
         <span class="flex flex-row items-center gap-2 flex-grow w-full">
@@ -404,6 +436,60 @@
       </DialogFooter>
     </DialogContent>
   </Dialog>
+
+  <!-- 自定义字体对话框 -->
+  <Dialog v-model:open="isCustomFontDialogOpen">
+    <DialogContent>
+      <DialogHeader>
+        <DialogTitle>{{ t('settings.common.customFontDialogTitle') }}</DialogTitle>
+        <DialogDescription>
+          {{ t('settings.common.customFontDialogDescription') }}
+        </DialogDescription>
+      </DialogHeader>
+
+      <div class="grid gap-4 py-4">
+        <div class="grid grid-cols-4 items-center gap-4">
+          <Label for="custom-font-name" class="text-right">
+            {{ t('settings.common.customFontName') }}
+          </Label>
+          <Input
+            id="custom-font-name"
+            v-model="customFontName"
+            class="col-span-3"
+            :placeholder="t('settings.common.customFontNamePlaceholder')"
+          />
+        </div>
+        <div class="grid grid-cols-4 items-center gap-4">
+          <Label for="custom-font-family" class="text-right">
+            {{ t('settings.common.customFontFamily') }}
+          </Label>
+          <Input
+            id="custom-font-family"
+            v-model="customFontFamily"
+            class="col-span-3"
+            :placeholder="t('settings.common.customFontFamilyPlaceholder')"
+          />
+        </div>
+        <div v-if="customFontFamily" class="p-4 border rounded-md">
+          <p class="text-sm text-muted-foreground">{{ t('settings.common.fontPreview') }}:</p>
+          <p :style="{ fontFamily: customFontFamily }" class="text-lg mt-2">
+            ABCDEFGHIJKLMNOPQRSTUVWXYZ<br>
+            abcdefghijklmnopqrstuvwxyz<br>
+            0123456789!@#$%^&*()
+          </p>
+        </div>
+      </div>
+
+      <DialogFooter>
+        <Button variant="outline" @click="closeCustomFontDialog">
+          {{ t('dialog.cancel') }}
+        </Button>
+        <Button @click="saveCustomFont" :disabled="!customFontName || !customFontFamily">
+          {{ t('dialog.confirm') }}
+        </Button>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
 </template>
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
@@ -439,11 +525,41 @@ import type { RENDERER_MODEL_META } from '@shared/presenter'
 import type { SearchEngineTemplate } from '@shared/chat'
 import { Switch } from '@/components/ui/switch'
 import { nanoid } from 'nanoid'
+import { Slider } from '@/components/ui/slider'
 
 const devicePresenter = usePresenter('devicePresenter')
 const configPresenter = usePresenter('configPresenter')
 const settingsStore = useSettingsStore()
 const { t } = useI18n()
+
+// 添加字体相关状态
+const selectedFont = ref('system')
+const fontSizeValue = ref([14])
+
+// 字体选项
+const fontOptions = ref([
+  { value: "system", label: t('settings.common.systemFont') || '系统默认' },
+  { value: "'Source Han Sans SC', '-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif", label: "思源黑体" },
+  { value: "'Microsoft YaHei', sans-serif", label: "微软雅黑" },
+  { value: "'PingFang SC', sans-serif", label: "苹方" },
+  { value: "'SimSun', serif", label: "宋体" },
+  { value: "'SimHei', sans-serif", label: "黑体" },
+  { value: "'KaiTi', serif", label: "楷体" },
+  { value: "'Arial', sans-serif", label: "Arial" },
+  { value: "'Times New Roman', serif", label: "Times New Roman" },
+  { value: "'Courier New', monospace", label: "Courier New" },
+  { value: "'JetBrains Mono', monospace", label: "JetBrains Mono" },
+  { value: "monospace", label: "等宽字体" },
+  // 添加Google手写风格字体
+  { value: "'Caveat', cursive", label: "Caveat (手写)" },
+  { value: "'Pacifico', cursive", label: "Pacifico (手写)" },
+  { value: "'Dancing Script', cursive", label: "Dancing Script (手写)" },
+  { value: "'Indie Flower', cursive", label: "Indie Flower (手写)" },
+  { value: "'Shadows Into Light', cursive", label: "Shadows Into Light (手写)" },
+  { value: "'Satisfy', cursive", label: "Satisfy (手写)" },
+  { value: "'Kalam', cursive", label: "Kalam (手写)" },
+  { value: "custom", label: t('settings.common.customFont') || '自定义字体' }
+])
 
 const selectedLanguage = ref('system')
 const selectedSearchEngine = ref(settingsStore.activeSearchEngine?.id ?? 'google')
@@ -572,17 +688,6 @@ const validateProxyUrl = () => {
   }
 }
 
-// const artifactsEffectEnabled = computed({
-//   get: () => {
-//     console.log('获取artifactsEffectEnabled值:', settingsStore.artifactsEffectEnabled)
-//     return settingsStore.artifactsEffectEnabled
-//   },
-//   set: (value) => {
-//     console.log('设置artifactsEffectEnabled值:', value)
-//     settingsStore.setArtifactsEffectEnabled(value)
-//   }
-// })
-
 onMounted(async () => {
   selectedLanguage.value = settingsStore.language
   selectedSearchEngine.value = settingsStore.activeSearchEngine?.id ?? 'google'
@@ -590,6 +695,32 @@ onMounted(async () => {
   selectedProxyMode.value = await configPresenter.getProxyMode()
   customProxyUrl.value = await configPresenter.getCustomProxyUrl()
   browserPath.value = await configPresenter.getBrowserPath()
+  
+  // 加载自定义字体
+  const customFonts = await configPresenter.getSetting<{value: string, label: string}[]>('customFonts')
+  if (customFonts && customFonts.length > 0) {
+    // 将自定义字体添加到字体选项中，但确保不重复添加
+    customFonts.forEach(font => {
+      if (!fontOptions.value.some(f => f.value === font.value)) {
+        fontOptions.value.push(font)
+      }
+    })
+  }
+  
+  // 加载字体设置
+  const savedFont = await configPresenter.getSetting<string>('fontFamily')
+  if (savedFont) {
+    selectedFont.value = savedFont
+    applyFontSettings()
+  }
+  
+  // 加载字体大小设置
+  const savedFontSize = await configPresenter.getSetting<string>('fontSize')
+  if (savedFontSize) {
+    fontSizeValue.value = [parseInt(savedFontSize) || 14]
+    applyFontSettings()
+  }
+  
   if (selectedProxyMode.value === 'custom' && customProxyUrl.value) {
     validateProxyUrl()
   }
@@ -843,4 +974,144 @@ watch(browserPath, async (newPath) => {
     await saveBrowserPath()
   }
 })
+
+// 监视字体变化
+watch(selectedFont, async (newFont) => {
+  if (newFont === 'custom') {
+    // 打开自定义字体对话框
+    openCustomFontDialog()
+    return
+  }
+  
+  await configPresenter.setSetting('fontFamily', newFont)
+  applyFontSettings()
+})
+
+// 监视字体大小变化
+watch(fontSizeValue, async (newSize) => {
+  await configPresenter.setSetting('fontSize', newSize[0].toString())
+  applyFontSettings()
+})
+
+// 应用字体设置到CSS变量
+const applyFontSettings = () => {
+  const root = document.documentElement
+  
+  // 设置字体
+  if (selectedFont.value === "system") {
+    root.style.removeProperty('--font-family')
+  } else {
+    root.style.setProperty('--font-family', selectedFont.value)
+  }
+  
+  // 设置字体大小
+  root.style.setProperty('--font-size', `${fontSizeValue.value[0]}px`)
+  
+  // 触发 CSS 变量更新事件，确保所有组件更新
+  window.dispatchEvent(new Event('fontSettingsChanged'))
+}
+
+// 确保初始化时就执行一次
+applyFontSettings()
+
+// 添加自定义字体状态
+const isCustomFontDialogOpen = ref(false)
+const customFontName = ref('')
+const customFontFamily = ref('')
+
+// 打开自定义字体对话框
+const openCustomFontDialog = () => {
+  customFontName.value = ''
+  customFontFamily.value = ''
+  
+  // 保存之前的字体以便取消时恢复
+  const prevFont = fontOptions.value.find(f => 
+    f.value !== 'custom' && f.value === selectedFont.value
+  )?.value || 'system'
+  
+  // 保存恢复字体值
+  localStorage.setItem('prev-font', prevFont)
+  
+  isCustomFontDialogOpen.value = true
+}
+
+// 处理字体对话框关闭
+const closeCustomFontDialog = () => {
+  isCustomFontDialogOpen.value = false
+  // 恢复原来的字体设置
+  const prevFont = localStorage.getItem('prev-font') || 'system'
+  selectedFont.value = prevFont
+}
+
+// 保存自定义字体
+const saveCustomFont = async () => {
+  if (!customFontName.value || !customFontFamily.value) return
+  
+  // 构造自定义字体对象
+  const customFontValue = customFontFamily.value
+
+  // 添加到字体选项列表
+  const existingIndex = fontOptions.value.findIndex(f => f.value === customFontValue)
+  
+  if (existingIndex >= 0) {
+    // 更新已存在的自定义字体
+    fontOptions.value[existingIndex].label = customFontName.value
+  } else {
+    // 添加新的自定义字体
+    fontOptions.value.push({
+      value: customFontValue,
+      label: customFontName.value
+    })
+  }
+
+  // 自定义字体记录类型
+  type CustomFont = {value: string, label: string}
+  
+  // 获取现有的自定义字体
+  const existingCustomFonts = await configPresenter.getSetting<CustomFont[]>('customFonts') || []
+  
+  // 添加新的自定义字体
+  const updatedCustomFonts = [...existingCustomFonts, {
+    value: customFontValue, 
+    label: customFontName.value
+  }]
+  
+  // 保存自定义字体到配置中
+  await configPresenter.setSetting('customFonts', updatedCustomFonts)
+  
+  // 设置当前选中的字体为自定义字体
+  selectedFont.value = customFontValue
+  await configPresenter.setSetting('fontFamily', customFontValue)
+  applyFontSettings()
+  
+  closeCustomFontDialog()
+}
 </script>
+
+<style>
+/* 添加手写字体的预览支持 */
+.preview-caveat {
+  font-family: 'Caveat', cursive;
+}
+.preview-pacifico {
+  font-family: 'Pacifico', cursive;
+}
+.preview-dancing-script {
+  font-family: 'Dancing Script', cursive;
+}
+.preview-indie-flower {
+  font-family: 'Indie Flower', cursive;
+}
+.preview-shadows-into-light {
+  font-family: 'Shadows Into Light', cursive;
+}
+.preview-satisfy {
+  font-family: 'Satisfy', cursive;
+}
+.preview-kalam {
+  font-family: 'Kalam', cursive;
+}
+.preview-jetbrains-mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+</style>
