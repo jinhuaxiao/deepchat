@@ -116,6 +116,27 @@
           </Select>
         </div>
       </div>
+      <!-- 浏览器路径设置 -->
+      <div class="flex flex-row p-2 items-center gap-2 px-2">
+        <span class="flex flex-row items-center gap-2 flex-grow w-full">
+          <Icon icon="lucide:chrome" class="w-4 h-4 text-muted-foreground" />
+          <span class="text-sm font-medium">{{ t('settings.common.browserPath') || '浏览器路径' }}</span>
+        </span>
+        <div class="flex-shrink-0 flex gap-2 min-w-64 max-w-96">
+          <Input
+            v-model="browserPath"
+            :placeholder="t('settings.common.browserPathPlaceholder') || '例如: C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'"
+          />
+          <Button
+            variant="outline"
+            size="icon"
+            @click="selectBrowserPath"
+            :title="t('settings.common.selectBrowserPath') || '选择浏览器路径'"
+          >
+            <Icon icon="lucide:folder-open" class="w-4 h-4" />
+          </Button>
+        </div>
+      </div>
       <div v-if="selectedProxyMode === 'custom'" class="flex flex-col p-2 gap-2 px-2">
         <div class="flex flex-row items-center gap-2">
           <span class="flex flex-row items-center gap-2 flex-grow w-full">
@@ -431,6 +452,7 @@ const selectedSearchModel = computed(() => settingsStore.searchAssistantModel)
 const selectedProxyMode = ref('system')
 const customProxyUrl = ref('')
 const showUrlError = ref(false)
+const browserPath = ref('')
 
 // 新增搜索引擎相关
 const isAddSearchEngineDialogOpen = ref(false)
@@ -567,6 +589,7 @@ onMounted(async () => {
 
   selectedProxyMode.value = await configPresenter.getProxyMode()
   customProxyUrl.value = await configPresenter.getCustomProxyUrl()
+  browserPath.value = await configPresenter.getBrowserPath()
   if (selectedProxyMode.value === 'custom' && customProxyUrl.value) {
     validateProxyUrl()
   }
@@ -783,4 +806,41 @@ const testSearchEngine = async () => {
     console.error('测试搜索引擎失败:', error)
   }
 }
+
+// 选择浏览器路径
+const selectBrowserPath = async () => {
+  try {
+    const result = await window.electron.ipcRenderer.invoke('dialog:openFile', {
+      title: t('settings.common.selectBrowserPath') || '选择浏览器路径',
+      filters: [
+        { name: 'Executables', extensions: ['exe'] },
+        { name: 'All Files', extensions: ['*'] }
+      ],
+      properties: ['openFile']
+    })
+    
+    if (!result.canceled && result.filePaths.length > 0) {
+      browserPath.value = result.filePaths[0]
+      await saveBrowserPath()
+    }
+  } catch (error) {
+    console.error('Failed to select browser path:', error)
+  }
+}
+
+// 保存浏览器路径
+const saveBrowserPath = async () => {
+  try {
+    await configPresenter.setBrowserPath(browserPath.value)
+  } catch (error) {
+    console.error('Failed to save browser path:', error)
+  }
+}
+
+// 监听浏览器路径变化
+watch(browserPath, async (newPath) => {
+  if (newPath !== await configPresenter.getBrowserPath()) {
+    await saveBrowserPath()
+  }
+})
 </script>

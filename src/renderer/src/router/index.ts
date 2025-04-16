@@ -1,4 +1,5 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
+import ProxiesView from '@/views/ProxiesView.vue'
 
 const router = createRouter({
   history: createWebHashHistory(import.meta.env.BASE_URL),
@@ -10,6 +11,15 @@ const router = createRouter({
       meta: {
         titleKey: 'routes.chat',
         icon: 'lucide:message-square'
+      }
+    },
+    {
+      path: '/profiles',
+      name: 'profiles',
+      component: () => import('@/views/ProfilesView.vue'),
+      meta: {
+        titleKey: 'routes.profiles',
+        icon: 'lucide:users'
       }
     },
     {
@@ -85,6 +95,11 @@ const router = createRouter({
           }
         }
       ]
+    },
+    {
+      path: '/proxies',
+      name: 'proxies',
+      component: ProxiesView
     }
   ]
 })

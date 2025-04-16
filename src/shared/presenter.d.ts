@@ -2,6 +2,8 @@
 import { BrowserWindow } from 'electron'
 import { MessageFile } from './chat'
 import { ShowResponse } from 'ollama'
+import { Profile } from './types/profile'
+import { ProxyConfig } from './types/proxy'
 
 export type SQLITE_MESSAGE = {
   id: string
@@ -121,6 +123,8 @@ export interface IPresenter {
   mcpPresenter: IMCPPresenter
   syncPresenter: ISyncPresenter
   deeplinkPresenter: IDeeplinkPresenter
+  profilePresenter: IProfilePresenter
+  proxyPresenter: IProxyPresenter
   init(): void
   destroy(): void
 }
@@ -179,6 +183,9 @@ export interface IConfigPresenter {
   setSyncFolderPath(folderPath: string): void
   getLastSyncTime(): number
   setLastSyncTime(time: number): void
+  // 浏览器路径设置
+  getBrowserPath(): string
+  setBrowserPath(path: string): void
   // MCP配置相关方法
   getMcpServers(): Promise<Record<string, MCPServerConfig>>
   setMcpServers(servers: Record<string, MCPServerConfig>): Promise<void>
@@ -755,6 +762,8 @@ export interface IDeeplinkPresenter {
    * @param params URL 参数
    */
   handleMcpInstall(params: URLSearchParams): Promise<void>
+
+  initDeeplink(): void
 }
 
 export interface ISyncPresenter {
@@ -771,4 +780,21 @@ export interface ISyncPresenter {
   // 初始化和销毁
   init(): void
   destroy(): void
+}
+
+export interface IProfilePresenter {
+  getAllProfiles(): Profile[]
+  createProfile(profileData: Omit<Profile, 'id' | 'createdAt'>): Profile
+  updateProfile(id: string, updates: Partial<Omit<Profile, 'id' | 'createdAt'>>): Profile | undefined
+  deleteProfile(id: string): boolean
+  openProfile(id: string): Promise<void>
+}
+
+export interface IProxyPresenter {
+  getAllProxies(): ProxyConfig[]
+  getProxyById(id: string): ProxyConfig | undefined
+  createProxy(proxyData: Omit<ProxyConfig, 'id' | 'createdAt'>): ProxyConfig
+  updateProxy(id: string, updates: Partial<Omit<ProxyConfig, 'id' | 'createdAt'>>): ProxyConfig | undefined
+  deleteProxy(id: string): boolean
+  isProxyInUse(id: string): boolean
 }

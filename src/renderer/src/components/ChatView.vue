@@ -1,5 +1,5 @@
 <template>
-  <div class="h-full flex flex-col overflow-hidden">
+  <div class="h-full flex flex-col overflow-hidden bg-white dark:bg-[#13131a]">
     <!-- 消息列表区域 -->
     <MessageList
       :key="chatStore.activeThreadId ?? 'default'"
@@ -9,7 +9,7 @@
     />
 
     <!-- 输入框区域 -->
-    <div class="flex-none p-2">
+    <div class="flex-none p-4 pb-6">
       <ChatInput
         :disabled="!chatStore.activeThreadId || isGenerating"
         @send="handleSend"

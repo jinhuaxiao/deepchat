@@ -28,6 +28,9 @@ module.exports = {
         ring: 'hsl(var(--ring))',
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
+        'background-super': {
+          200: 'oklch(var(--background-super-color-200) / <alpha-value>)'
+        },
         primary: {
           DEFAULT: 'hsl(var(--primary))',
           foreground: 'hsl(var(--primary-foreground))'

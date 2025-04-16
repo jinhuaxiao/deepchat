@@ -5,7 +5,7 @@ import { SQLitePresenter } from './sqlitePresenter'
 import { ShortcutPresenter } from './shortcutPresenter'
 import { IPresenter } from '@shared/presenter'
 import { eventBus } from '@/eventbus'
-import path from 'path'
+import * as path from 'path'
 import { LLMProviderPresenter } from './llmProviderPresenter'
 import { ConfigPresenter } from './configPresenter'
 import { ThreadPresenter } from './threadPresenter'
@@ -15,6 +15,8 @@ import { FilePresenter } from './filePresenter/FilePresenter'
 import { McpPresenter } from './mcpPresenter'
 import { SyncPresenter } from './syncPresenter'
 import { DeeplinkPresenter } from './deeplinkPresenter'
+import { ProfilePresenter } from './ProfilePresenter'
+import { ProxyPresenter } from './ProxyPresenter'
 import {
   CONFIG_EVENTS,
   CONVERSATION_EVENTS,
@@ -41,6 +43,8 @@ export class Presenter implements IPresenter {
   mcpPresenter: McpPresenter
   syncPresenter: SyncPresenter
   deeplinkPresenter: DeeplinkPresenter
+  profilePresenter: ProfilePresenter
+  proxyPresenter: ProxyPresenter
   // llamaCppPresenter: LlamaCppPresenter
 
   constructor() {
@@ -63,6 +67,8 @@ export class Presenter implements IPresenter {
     this.filePresenter = new FilePresenter()
     this.syncPresenter = new SyncPresenter(this.configPresenter, this.sqlitePresenter)
     this.deeplinkPresenter = new DeeplinkPresenter()
+    this.profilePresenter = new ProfilePresenter()
+    this.proxyPresenter = new ProxyPresenter()
     // this.llamaCppPresenter = new LlamaCppPresenter()
     this.setupEventBus()
   }
@@ -209,6 +215,12 @@ export class Presenter implements IPresenter {
     eventBus.on(NOTIFICATION_EVENTS.SHOW_ERROR, (error) => {
       this.windowPresenter.mainWindow?.webContents.send(NOTIFICATION_EVENTS.SHOW_ERROR, error)
     })
+
+    // Potentially add Profile related event forwarding here later if needed
+    // e.g., if profile list changes, notify renderer
+    // eventBus.on(PROFILE_EVENTS.LIST_CHANGED, () => {
+    //   this.windowPresenter.mainWindow?.webContents.send(PROFILE_EVENTS.LIST_CHANGED)
+    // })
   }
 
   init() {
@@ -249,7 +261,28 @@ export class Presenter implements IPresenter {
   }
 }
 
-export const presenter = new Presenter()
+export const presenter: IPresenter = {
+  windowPresenter: new Presenter().windowPresenter,
+  sqlitePresenter: new Presenter().sqlitePresenter,
+  llmproviderPresenter: new Presenter().llmproviderPresenter,
+  configPresenter: new Presenter().configPresenter,
+  threadPresenter: new Presenter().threadPresenter,
+  devicePresenter: new Presenter().devicePresenter,
+  upgradePresenter: new Presenter().upgradePresenter,
+  shortcutPresenter: new Presenter().shortcutPresenter,
+  filePresenter: new Presenter().filePresenter,
+  mcpPresenter: new Presenter().mcpPresenter,
+  syncPresenter: new Presenter().syncPresenter,
+  deeplinkPresenter: new Presenter().deeplinkPresenter,
+  profilePresenter: new Presenter().profilePresenter,
+  proxyPresenter: new Presenter().proxyPresenter,
+  init: Presenter.prototype.init,
+  destroy: Presenter.prototype.destroy
+}
+
+export const profilePresenter = new ProfilePresenter()
+export const proxyPresenter = new ProxyPresenter()
+
 ipcMain.handle(
   'presenter:call',
   (_event: IpcMainInvokeEvent, name: string, method: string, ...payloads: unknown[]) => {

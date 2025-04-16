@@ -156,7 +156,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="flex flex-col h-screen">
+  <div class="flex flex-col h-screen bg-white dark:bg-[#13131a] overflow-hidden">
     <AppBar />
     <div class="flex flex-row h-0 flex-grow relative overflow-hidden">
       <!-- 侧边导航栏 -->
@@ -169,15 +169,31 @@ onBeforeUnmount(() => {
       <!-- 主内容区域 -->
       <div
         :class="{
-          'flex-1 w-0 h-full transition-all duration-200': true,
+          'flex-1 w-0 h-full transition-all duration-300 ease-in-out bg-white dark:bg-[#13131a]': true,
           'mr-[calc(60%_-_104px)]': artifactStore.isOpen && route.name === 'chat'
         }"
       >
-        <RouterView />
+        <RouterView v-slot="{ Component }">
+          <transition
+            name="page-transition"
+            mode="out-in"
+          >
+            <component :is="Component" />
+          </transition>
+        </RouterView>
       </div>
 
       <!-- Artifacts 预览区域 -->
-      <ArtifactDialog />
+      <transition
+        enter-active-class="transition-all duration-300 ease-out" 
+        enter-from-class="translate-x-full opacity-0"
+        enter-to-class="translate-x-0 opacity-100"
+        leave-active-class="transition-all duration-300 ease-in"
+        leave-from-class="translate-x-0 opacity-100"
+        leave-to-class="translate-x-full opacity-0"
+      >
+        <ArtifactDialog v-if="artifactStore.isOpen" />
+      </transition>
     </div>
     <!-- 全局更新弹窗 -->
     <UpdateDialog />
@@ -185,3 +201,15 @@ onBeforeUnmount(() => {
     <Toaster />
   </div>
 </template>
+
+<style scoped>
+.page-transition-enter-active,
+.page-transition-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.page-transition-enter-from,
+.page-transition-leave-to {
+  opacity: 0;
+}
+</style>

@@ -17,9 +17,9 @@ const props = withDefaults(defineProps<Props>(), {
 const darkBg = computed(() => {
   let className = ''
   if (props.variant === 'outline') {
-    className = 'dark:bg-muted'
+    className = 'dark:bg-muted dark:hover:bg-accent'
   } else if (props.variant === 'default') {
-    className = 'dark:hover:bg-primary'
+    className = 'dark:hover:bg-primary/90'
   }
   return className
 })

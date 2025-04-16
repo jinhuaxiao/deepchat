@@ -1,5 +1,5 @@
 <template>
-  <div class="flex h-full bg-background">
+  <div class="flex h-full bg-white dark:bg-[#13131a]">
     <!-- 左侧会话列表 -->
     <Transition
       enter-active-class="transition-all duration-300 ease-out"
@@ -92,8 +92,8 @@ const activeModel = computed(() => {
 
 /* 添加全局样式 */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
@@ -101,11 +101,11 @@ const activeModel = computed(() => {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #d1d5db80;
-  border-radius: 4px;
+  background: #d1d5db50;
+  border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #9ca3af80;
+  background: #9ca3af70;
 }
 </style>

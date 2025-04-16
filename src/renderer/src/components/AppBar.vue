@@ -1,34 +1,37 @@
 <template>
   <div
-    class="h-9 flex-shrink-0 w-full flex items-center justify-between select-none bg-background border-b"
+    class="h-10 flex-shrink-0 w-full flex items-center justify-between select-none bg-white dark:bg-[#13131a] border-b border-border/40 transition-all duration-200 ease-in-out"
   >
     <!-- App title/content in center -->
     <div
       :class="[
-        'flex-1 text-center text-sm font-medium window-drag-region',
+        'flex-1 text-center font-medium window-drag-region flex items-center justify-center',
         isMacOS ? 'px-20' : 'px-4'
       ]"
     >
-      DeepChat
+      <span class="text-primary flex items-center gap-2 text-sm">
+        <Icon icon="lucide:message-circle" class="h-4 w-4" />
+        DeepChat
+      </span>
     </div>
 
     <!-- Windows/Linux window controls (only shown on Windows/Linux) -->
-    <div v-if="!isMacOS" class="flex h-9">
+    <div v-if="!isMacOS" class="flex h-10">
       <button
-        class="inline-flex items-center justify-center h-9 w-12 hover:bg-muted"
+        class="inline-flex items-center justify-center h-10 w-12 hover:bg-muted transition-colors duration-150"
         @click="minimizeWindow"
       >
         <MinusIcon class="h-4 w-4" />
       </button>
       <button
-        class="inline-flex items-center justify-center h-9 w-12 hover:bg-muted"
+        class="inline-flex items-center justify-center h-10 w-12 hover:bg-muted transition-colors duration-150"
         @click="toggleMaximize"
       >
         <MaximizeIcon v-if="!isMaximized" class="h-4 w-4" />
         <RestoreIcon v-else class="h-4 w-4" />
       </button>
       <button
-        class="inline-flex items-center justify-center h-9 w-12 hover:bg-destructive hover:text-destructive-foreground"
+        class="inline-flex items-center justify-center h-10 w-12 hover:bg-destructive hover:text-destructive-foreground transition-colors duration-150"
         @click="closeWindow"
       >
         <XIcon class="h-4 w-4" />
@@ -42,6 +45,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { MinusIcon, XIcon } from 'lucide-vue-next'
+import { Icon } from '@iconify/vue'
 import MaximizeIcon from './icons/MaximizeIcon.vue'
 import RestoreIcon from './icons/RestoreIcon.vue'
 import { usePresenter } from '@/composables/usePresenter'

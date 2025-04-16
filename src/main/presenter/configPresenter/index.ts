@@ -28,6 +28,7 @@ interface IAppSettings {
   appVersion?: string // 用于版本检查和数据迁移
   proxyMode?: string // 代理模式：system, none, custom
   customProxyUrl?: string // 自定义代理地址
+  browserPath?: string // 浏览器可执行文件路径
   artifactsEffectEnabled?: boolean // artifacts动画效果是否启用
   searchPreviewEnabled?: boolean // 搜索预览是否启用
   contentProtectionEnabled?: boolean // 投屏保护是否启用
@@ -81,6 +82,7 @@ export class ConfigPresenter implements IConfigPresenter {
         closeToQuit: false,
         proxyMode: 'system',
         customProxyUrl: '',
+        browserPath: '',
         artifactsEffectEnabled: true,
         searchPreviewEnabled: true,
         contentProtectionEnabled: false,
@@ -647,6 +649,14 @@ export class ConfigPresenter implements IConfigPresenter {
     setTimeout(() => {
       presenter.devicePresenter.restartApp()
     }, 1000)
+  }
+
+  getBrowserPath(): string {
+    return this.getSetting<string>('browserPath') || ''
+  }
+
+  setBrowserPath(path: string): void {
+    this.setSetting('browserPath', path)
   }
 
   // ===================== MCP配置相关方法 =====================

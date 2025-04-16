@@ -7,66 +7,67 @@
     >
       <div
         ref="messageList"
-        class="w-full max-w-full break-all xl:max-w-4xl mx-auto transition-opacity duration-300"
+        class="w-full max-w-full break-all xl:max-w-3xl mx-auto px-4 py-8 transition-opacity duration-300"
         :class="{ 'opacity-0': !visible }"
       >
         <template v-for="(msg, index) in messages" :key="index">
-          <MessageItemAssistant
-            v-if="msg.role === 'assistant'"
-            :key="index"
-            :message="msg"
-            :ref="setAssistantRef(index)"
-          />
-          <MessageItemUser
-            v-if="msg.role === 'user'"
-            :key="index"
-            :message="msg"
-            @retry="handleRetry(index)"
-          />
+          <div class="message-item-container mb-8 transition-all duration-200">
+            <MessageItemAssistant
+              v-if="msg.role === 'assistant'"
+              :key="index"
+              :message="msg"
+              :ref="setAssistantRef(index)"
+              class="message-item"
+            />
+            <MessageItemUser
+              v-if="msg.role === 'user'"
+              :key="index"
+              :message="msg"
+              @retry="handleRetry(index)"
+              class="message-item"
+            />
+          </div>
         </template>
       </div>
-      <div ref="scrollAnchor" class="h-8" />
+      <div ref="scrollAnchor" class="h-10" />
     </div>
-    <div v-if="showCancelButton" class="absolute bottom-2 left-1/2 -translate-x-1/2">
-      <Button variant="outline" size="sm" class="rounded-lg" @click="handleCancel">
-        <Icon
-          icon="lucide:square"
-          class="w-6 h-6 bg-red-500 p-1 text-primary-foreground rounded-full"
-        />
-        <span class="">{{ t('common.cancel') }}</span>
+    
+    <div v-if="showCancelButton" class="absolute bottom-3 left-1/2 -translate-x-1/2 z-10">
+      <Button variant="destructive" size="sm" class="rounded-full px-4 shadow-md flex items-center gap-2 animate-pulse-subtle" @click="handleCancel">
+        <Icon icon="lucide:square" class="w-4 h-4" />
+        <span>{{ t('common.cancel') }}</span>
       </Button>
     </div>
+    
     <div
       v-else
-      class="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center"
-      :class="[aboveThreshold ? 'w-36' : ' w-24']"
-      :style="{
-        transition: 'width 300ms ease-in-out'
-      }"
+      class="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-2 z-10"
     >
-      <Button variant="outline" size="sm" class="rounded-lg shrink-0" @click="createNewThread">
-        <Icon icon="lucide:plus" class="w-6 h-6 text-muted-foreground" />
-        <span class="">{{ t('common.newChat') }}</span>
+      <Button variant="secondary" size="sm" class="rounded-full px-4 shadow-md" @click="createNewThread">
+        <Icon icon="lucide:plus" class="w-4 h-4 mr-1" />
+        <span>{{ t('common.newChat') }}</span>
       </Button>
+      
       <transition
-        enter-active-class="transition-all duration-300 ease-out"
-        enter-from-class="opacity-0 translate-y-2"
-        enter-to-class="opacity-100 translate-y-0"
-        leave-active-class="transition-all duration-300 ease-in"
-        leave-from-class="opacity-100 translate-y-0"
-        leave-to-class="opacity-0 translate-y-2"
+        enter-active-class="transition-all duration-200 ease-out"
+        enter-from-class="opacity-0 scale-90"
+        enter-to-class="opacity-100 scale-100"
+        leave-active-class="transition-all duration-200 ease-in"
+        leave-from-class="opacity-100 scale-100"
+        leave-to-class="opacity-0 scale-90"
       >
         <Button
           v-if="aboveThreshold"
           variant="outline"
           size="icon"
-          class="w-8 h-8 ml-2 shrink-0 rounded-lg"
-          @click="scrollToBottom"
+          class="w-8 h-8 rounded-full shadow-md bg-white/80 dark:bg-[#13131a]/80 backdrop-blur-sm hover:bg-primary/10 hover:text-primary"
+          @click="scrollToBottom(true)"
         >
-          <Icon icon="lucide:arrow-down" class="w-5 h-5 text-muted-foreground" />
+          <Icon icon="lucide:arrow-down" class="w-4 h-4" />
         </Button>
       </transition>
     </div>
+    
     <ReferencePreview
       class="pointer-events-none"
       :show="referenceStore.showPreview"
@@ -111,10 +112,10 @@ const setAssistantRef = (index: number) => (el: any) => {
     assistantRefs[index] = el
   }
 }
-const scrollToBottom = () => {
+const scrollToBottom = (smooth = false) => {
   nextTick(() => {
     scrollAnchor.value?.scrollIntoView({
-      behavior: 'instant',
+      behavior: smooth ? 'smooth' : 'instant',
       block: 'end'
     })
   })
@@ -193,3 +194,34 @@ onMounted(() => {
   })
 })
 </script>
+
+<style scoped>
+.message-item {
+  transform-origin: bottom;
+  animation: messageAppear 0.3s ease-out forwards;
+}
+
+@keyframes messageAppear {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 2s infinite;
+}
+
+@keyframes pulse-subtle {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+</style>

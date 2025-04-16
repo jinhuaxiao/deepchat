@@ -9,18 +9,18 @@
   >
     <TooltipProvider>
       <div
-        class="bg-card border border-border rounded-lg focus-within:border-primary p-2 flex flex-col gap-2 shadow-sm relative"
+        class="bg-background-super-200 border border-border/40 rounded-3xl focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary/70 p-4 flex flex-col gap-3 shadow-md hover:shadow-lg transition-all duration-200 relative"
       >
-        <!-- {{  t('chat.input.fileArea') }} -->
-        <div v-if="selectedFiles.length > 0">
+        <!-- 文件区域 -->
+        <div v-if="selectedFiles.length > 0" class="pb-1">
           <TransitionGroup
             name="file-list"
             tag="div"
-            class="flex flex-wrap gap-1.5"
+            class="flex flex-wrap gap-2"
             enter-active-class="transition-all duration-300 ease-in-out"
             leave-active-class="transition-all duration-300 ease-in-out"
-            enter-from-class="opacity-0 -translate-y-2"
-            leave-to-class="opacity-0 -translate-y-2"
+            enter-from-class="opacity-0 scale-95"
+            leave-to-class="opacity-0 scale-95"
             move-class="transition-transform duration-300 ease-in-out"
           >
             <FileItem
@@ -35,7 +35,8 @@
             />
           </TransitionGroup>
         </div>
-        <!-- {{ t('chat.input.inputArea') }} -->
+        
+        <!-- 输入区域 -->
         <Textarea
           ref="textareaRef"
           v-model="inputText"
@@ -43,20 +44,20 @@
           :rows="rows"
           :max-rows="maxRows"
           :placeholder="t('chat.input.placeholder')"
-          class="textarea-selector border-none max-h-[10rem] shadow-none p-2 focus-visible:ring-0 focus-within:ring-0 ring-0 outline-none focus-within:outline-none text-sm resize-none overflow-y-auto"
+          class="textarea-selector border-none max-h-[10rem] shadow-none p-2 focus-visible:ring-0 focus-within:ring-0 ring-0 outline-none focus-within:outline-none text-sm resize-none overflow-y-auto transition-all duration-200 bg-transparent"
           @keydown.enter.exact.prevent="handleEnterKey"
           @input="adjustHeight"
         ></Textarea>
 
         <div class="flex items-center justify-between">
-          <!-- {{ t('chat.input.functionSwitch') }} -->
-          <div class="flex gap-1.5">
+          <!-- 功能按钮区 -->
+          <div class="flex gap-2 flex-wrap items-center">
             <Tooltip>
               <TooltipTrigger>
                 <Button
                   variant="outline"
                   size="icon"
-                  class="w-7 h-7 text-xs rounded-lg text-muted-foreground"
+                  class="w-8 h-8 rounded-full text-muted-foreground hover:text-primary hover:bg-primary/10 hover:scale-105 transition-all duration-200 shadow-sm border-border/40"
                   @click="openFilePicker"
                 >
                   <Icon icon="lucide:paperclip" class="w-4 h-4" />
@@ -73,42 +74,24 @@
               <TooltipContent>{{ t('chat.input.fileSelect') }}</TooltipContent>
             </Tooltip>
 
-            <!-- MCP 工具列表 -->
-
-            <!-- <Tooltip v-show="false">
-              <TooltipTrigger>
-                <Button
-                  variant="outline"
-                  size="xs"
-                  :class="[
-                    'rounded-lg text-xs font-normal',
-                    settings.deepThinking
-                      ? '!bg-primary dark:!bg-primary border-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
-                      : 'text-muted-foreground'
-                  ]"
-                  @click="onDeepThinkingClick"
-                >
-                  <Icon icon="lucide:sparkles" class="w-4 h-4" />
-                  {{ t('chat.features.deepThinking') }}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>{{ t('chat.features.deepThinking') }}</TooltipContent>
-            </Tooltip> -->
+            <!-- 网络搜索选择器 -->
             <Tooltip>
               <TooltipTrigger>
                 <span
-                  class="search-engine-select overflow-hidden flex items-center h-7 rounded-lg shadow-sm border border-border transition-all duration-300"
+                  class="search-engine-select overflow-hidden flex items-center h-8 rounded-full shadow-md border border-border/40 transition-all duration-300 hover:border-primary/70 hover:shadow-lg"
                   :class="{
-                    'border-primary': settings.webSearch
+                    'border-primary/70 ring-1 ring-primary/20 bg-primary/5': settings.webSearch
                   }"
+                  @mouseenter="isSearchHovering = true"
+                  @mouseleave="isSearchHovering = false"
                 >
                   <Button
                     variant="outline"
                     :class="[
-                      'flex w-7 border-none rounded-none shadow-none items-center gap-1.5 px-2 h-full',
+                      'flex w-8 border-none rounded-l-full items-center justify-center h-full transition-all duration-200 hover:scale-105',
                       settings.webSearch
-                        ? 'dark:!bg-primary bg-primary border-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
-                        : 'text-muted-foreground'
+                        ? 'bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm ring-1 ring-primary/20'
+                        : 'text-foreground dark:text-muted-foreground hover:text-primary hover:bg-primary/10 border border-border/40 dark:border-border/20 dark:hover:bg-accent/20'
                     ]"
                     size="icon"
                     @click="onWebSearchClick"
@@ -121,7 +104,7 @@
                     @update:open="handleSelectOpen"
                   >
                     <SelectTrigger
-                      class="h-full rounded-none border-none shadow-none hover:bg-accent text-muted-foreground dark:hover:text-primary-foreground transition-all duration-300"
+                      class="h-full rounded-none border-none shadow-none hover:bg-accent text-muted-foreground dark:hover:text-primary-foreground transition-all duration-300 rounded-r-full"
                       :class="{
                         'w-0 opacity-0 p-0 overflow-hidden':
                           !showSearchSettingsButton && !isSearchHovering && !isSelectOpen,
@@ -138,6 +121,7 @@
                         v-for="engine in searchEngines"
                         :key="engine.id"
                         :value="engine.id"
+                        class="transition-colors duration-200"
                       >
                         {{ engine.name }}
                       </SelectItem>
@@ -149,21 +133,22 @@
             </Tooltip>
 
             <McpToolsList />
-            <!-- {{ t('chat.input.fileSelect') }} -->
             <slot name="addon-buttons"></slot>
           </div>
-          <div class="flex items-center gap-2">
+          
+          <!-- 发送按钮和上下文长度 -->
+          <div class="flex items-center gap-3">
             <div
               v-if="
                 contextLength &&
                 contextLength > 0 &&
                 currentContextLength / (contextLength ?? 1000) > 0.5
               "
-              class="text-xs text-muted-foreground"
+              class="text-xs font-medium rounded-full px-2 py-0.5 bg-background/50 backdrop-blur-sm"
               :class="[
-                currentContextLength / (contextLength ?? 1000) > 0.9 ? ' text-red-600' : '',
+                currentContextLength / (contextLength ?? 1000) > 0.9 ? 'text-red-500 bg-red-500/10' : '',
                 currentContextLength / (contextLength ?? 1000) > 0.8
-                  ? ' text-yellow-600'
+                  ? 'text-yellow-500 bg-yellow-500/10'
                   : 'text-muted-foreground'
               ]"
             >
@@ -172,18 +157,24 @@
             <Button
               variant="default"
               size="icon"
-              class="w-7 h-7 text-xs rounded-lg"
+              class="w-10 h-10 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200"
+              :class="{ 'bg-primary hover:bg-primary/90 ring-1 ring-primary/20': !disabledSend }"
               :disabled="disabledSend"
               @click="emitSend"
             >
-              <Icon icon="lucide:arrow-up" class="w-4 h-4" />
+              <Icon icon="lucide:arrow-up" class="w-5 h-5" />
             </Button>
           </div>
         </div>
-        <div v-if="isDragging" class="absolute inset-0 bg-black/40 rounded-lg">
-          <div class="flex items-center justify-center h-full gap-1">
-            <Icon icon="lucide:file-up" class="w-4 h-4 text-white" />
-            <span class="text-sm text-white">Drop files here</span>
+        
+        <!-- 拖拽文件覆盖层 -->
+        <div 
+          v-if="isDragging" 
+          class="absolute inset-0 bg-primary/10 backdrop-blur-sm rounded-3xl border-2 border-dashed border-primary/70 transition-all duration-200 animate-pulse-subtle"
+        >
+          <div class="flex items-center justify-center h-full gap-2">
+            <Icon icon="lucide:file-up" class="w-5 h-5 text-primary" />
+            <span class="text-sm font-medium text-primary">Drop files here</span>
           </div>
         </div>
       </div>
@@ -392,11 +383,6 @@ const onWebSearchClick = async () => {
   await configPresenter.setSetting('input_webSearch', settings.value.webSearch)
 }
 
-// const onDeepThinkingClick = async () => {
-//   settings.value.deepThinking = !settings.value.deepThinking
-//   await configPresenter.setSetting('input_deepThinking', settings.value.deepThinking)
-// }
-
 const onSearchEngineChange = async (engineName: string) => {
   await settingsStore.setSearchEngine(engineName)
 }
@@ -474,12 +460,12 @@ const handleSelectOpen = (isOpen: boolean) => {
   isSelectOpen.value = isOpen
 }
 
-// Mouse hover handlers for search engine selector
-const handleSearchMouseEnter = () => {
+// 添加鼠标悬停事件处理函数
+const handleSearchMouseEnter = (): void => {
   isSearchHovering.value = true
 }
 
-const handleSearchMouseLeave = () => {
+const handleSearchMouseLeave = (): void => {
   isSearchHovering.value = false
 }
 
@@ -508,12 +494,16 @@ defineExpose({
 </script>
 
 <style scoped>
-.transition-all {
-  transition-property: all;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+.animate-pulse-subtle {
+  animation: pulse-subtle 2s infinite;
 }
 
-.duration-300 {
-  transition-duration: 300ms;
+@keyframes pulse-subtle {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
 }
 </style>

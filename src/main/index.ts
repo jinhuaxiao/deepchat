@@ -2,11 +2,21 @@ import { app, BrowserWindow, protocol } from 'electron'
 import { electronApp, optimizer } from '@electron-toolkit/utils'
 import { presenter } from './presenter'
 import { ProxyMode, proxyConfig } from './presenter/proxyConfig'
-import path from 'path'
-import fs from 'fs'
+import * as path from 'path'
+import * as fs from 'fs'
 import { eventBus } from './eventbus'
 import { WINDOW_EVENTS } from './events'
 import { setLoggingEnabled } from '@shared/logger'
+
+// Force UTF-8 encoding for stdout and stderr
+if (process.platform === 'win32') {
+  process.stdout.setDefaultEncoding('utf-8');
+  process.stderr.setDefaultEncoding('utf-8');
+  // Optional: Also force console encoding if needed
+  // (though usually setting stdout/stderr is enough)
+  // const cp = require('child_process');
+  // cp.execSync('chcp 65001');
+}
 
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required')
 app.commandLine.appendSwitch('webrtc-max-cpu-consumption-percentage', '100')
